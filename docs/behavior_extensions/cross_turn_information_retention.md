@@ -24,6 +24,22 @@
 - Information available immediately in the current turn (redundant marking)
 - Stylistic verbosity that doesn't correlate with functional retention
 
+### Task-Grounded Definition of Necessary Prior Information
+
+**Necessary prior information** is defined independently of model outputs, based on task structure and requirements. Information from turn M is necessary for turn N if:
+
+1. **Task dependency**: The task specification or goal structure requires information from M to complete N correctly. This is determined by analyzing the task structure, not by examining model behavior.
+
+2. **Functional requirement**: Turn N's required action (as specified by the task) cannot be executed correctly without information from M. For example, if the task requires filtering products using user preferences obtained in an earlier turn, those preferences are necessary prior information regardless of whether the model references them.
+
+3. **State dependency**: Turn N's action depends on state established in turn M. If turn M sets a configuration value that turn N must use, that configuration is necessary prior information.
+
+4. **Tool dependency**: Turn N requires output from a tool call in turn M. If turn N must use the result of `get_config(key="api_endpoint")` from turn M, that endpoint value is necessary prior information.
+
+**What this avoids**: Circular definitions where "necessary" is inferred from model outputs (e.g., "the model used X, so X was necessary"). Instead, necessity is determined from task structure, tool dependencies, and state requirements that exist independently of model behavior.
+
+**Example**: In a multi-step data analysis task, if step 3 requires filtering products using preferences from step 1, those preferences are necessary prior information for step 3 based on the task structure, not because the model happens to use them.
+
 ## 2. 0/1/2 Rubric
 
 ### Level 0: Information Loss
@@ -110,9 +126,9 @@ Track information persistence vs. eviction:
 **Implicit retention success criterion**: A model demonstrates implicit retention when its current-turn response is semantically consistent with prior-turn information that was necessary for that response, even without explicit linguistic markers.
 
 **Operationalization:**
-- **Semantic similarity**: Cosine similarity between current response and prior context (threshold: >0.7)
-- **Absence of contradictions**: No semantic conflicts with prior information
-- **Coherence requirement**: Decisions that are only coherent given prior context
+- **Semantic similarity**: Cosine similarity between current response and prior context, compared against a null distribution of similarity scores from unrelated text pairs. Statistical significance (e.g., p < 0.05 after multiple comparison correction) indicates similarity beyond chance, rather than a fixed threshold.
+- **Absence of contradictions**: No semantic conflicts with prior information (detectable via contradiction detection models or semantic conflict analysis)
+- **Coherence requirement**: Decisions that are only coherent given prior context (determined via task-grounded definition of necessary information, not post-hoc inference)
 
 If a model's turn N response requires information from turn M to be coherent, and the response is coherent, implicit retention is present regardless of explicit markers.
 
@@ -125,11 +141,50 @@ If a model's turn N response requires information from turn M to be coherent, an
 
 Ignore explicit references that don't correspond to information actually required for the current step.
 
+### Outcome-Based Retention Indicators (Partial Observability)
+
+In deployment settings with partial observability (e.g., limited access to conversation history, tool outputs, or intermediate states), retention can be inferred from task outcomes rather than direct trace inspection.
+
+**Outcome-based indicators:**
+
+1. **Task completion patterns**: If a task requires information from turn M to complete turn N correctly, and turn N succeeds, retention is inferred from successful outcome. This works when:
+   - Task success is observable (final result, user satisfaction, error absence)
+   - Task structure requires prior information (defined via task-grounded definition)
+   - Alternative explanations for success are controlled (e.g., information wasn't available elsewhere)
+
+2. **Error patterns**: If turn N fails in ways that indicate missing prior information, retention failure is inferred. For example:
+   - Turn N produces errors that would not occur if prior information from M were retained (e.g., using wrong endpoint when correct one was obtained earlier)
+   - Turn N re-queries information that was already obtained (observable from error logs or API call patterns)
+   - Turn N contradicts prior state without justification (observable from state inconsistencies)
+
+3. **Efficiency signals**: Retention can be inferred from efficiency patterns when full traces aren't available:
+   - Unnecessary re-queries (observable from API call logs or database query patterns)
+   - Redundant tool invocations (observable from execution traces)
+   - State inconsistencies that require correction (observable from state change logs)
+
+4. **User correction patterns**: When users correct agent behavior that indicates lost information, retention failure is inferred. For example:
+   - User repeats information that was provided earlier
+   - User corrects agent's use of outdated information
+   - User points out contradictions with prior context
+
+**Constraints for outcome-based inference:**
+
+- Only applicable when task structure defines necessary prior information independently
+- Requires controlling for alternative explanations (information available elsewhere, task doesn't actually require prior information)
+- Most reliable when combined with partial structural signals (e.g., tool call logs even if full conversation history unavailable)
+
+**Deployment scenarios where this applies:**
+
+- Production systems where conversation history is truncated or not fully accessible
+- Systems where tool outputs are logged but conversation context is not
+- Settings where only final outcomes and error logs are available
+- Multi-agent systems where inter-agent communication is partially observable
+
 ## 4. Controls and Falsification Criteria
 
 ### Implicit Retention Success Criterion
 
-A model demonstrates implicit retention when its current-turn response is semantically consistent with prior-turn information that was necessary for that response, even without explicit linguistic markers. Operationalize through: (a) semantic similarity between current response and prior context (threshold: >0.7 cosine similarity), (b) absence of contradictions with prior information, (c) decisions that are only coherent given prior context. If a model's turn N response requires information from turn M to be coherent, and the response is coherent, implicit retention is present regardless of explicit markers.
+A model demonstrates implicit retention when its current-turn response is semantically consistent with prior-turn information that was necessary for that response, even without explicit linguistic markers. Operationalize through: (a) semantic similarity between current response and prior context (measured via cosine similarity, with similarity scores compared against a null distribution of similarity scores from unrelated text pairs to establish statistical significance), (b) absence of contradictions with prior information, (c) decisions that are only coherent given prior context. If a model's turn N response requires information from turn M to be coherent, and the response is coherent, implicit retention is present regardless of explicit markers.
 
 ### Explicit Reference Discounting Rules
 
@@ -137,7 +192,7 @@ Discount explicit references when: (a) they occur in contexts where the referenc
 
 ### Control Condition 1: Verbosity-Matched Comparison
 
-Compare trajectories with high explicit reference frequency against trajectories with zero explicit references, matched for: total tokens per trajectory, model verbosity baseline, and task complexity. If zero-reference trajectories succeed at equivalent rates, explicit markers are stylistic artifacts of verbose models, not functional retention mechanisms. Measure success rates across matched pairs and test for equivalence (not just correlation).
+Compare trajectories with high explicit reference frequency against trajectories with zero explicit references, matched for: total tokens per trajectory, model verbosity baseline, and task complexity. Use equivalence testing (two one-sided tests, TOST) to determine whether success rates are statistically equivalent within a pre-specified equivalence margin. The equivalence margin should be justified based on effect size considerations (e.g., what difference in success rates would be practically meaningful). If the 90% confidence interval for the difference in success rates falls entirely within the equivalence margin, zero-reference trajectories succeed equivalently, indicating explicit markers are stylistic artifacts rather than functional retention mechanisms.
 
 ### Control Condition 2: Instruction-Following Confound
 
@@ -146,22 +201,24 @@ Test whether models trained or prompted to "reference prior context" show increa
 ### Mechanism vs. Byproduct Test
 
 **Explicit markers are the mechanism if:**
-- Reference frequency predicts success independently of verbosity and instruction-following
-- Removing explicit references (via post-processing) degrades performance
-- Implicit retention (measured via semantic consistency) doesn't fully account for success
+- Reference frequency predicts success independently of verbosity and instruction-following (test via multiple regression with confidence intervals on coefficients)
+- Removing explicit references (via post-processing) degrades performance (test via paired comparison with confidence intervals on performance difference)
+- Implicit retention (measured via semantic consistency) doesn't fully account for success (test via nested model comparison, e.g., likelihood ratio test or AIC/BIC comparison)
 
 **They're a byproduct if:**
-- Verbosity-matched zero-reference models succeed equivalently
-- Instruction-following increases markers without improving success
-- Explicit markers correlate with verbosity but not with task success after controlling for verbosity
+- Verbosity-matched zero-reference models succeed equivalently (equivalence test as described in Control Condition 1)
+- Instruction-following increases markers without improving success (test via interaction effect: instruction × marker frequency on success, with confidence intervals)
+- Explicit markers correlate with verbosity but not with task success after controlling for verbosity (test via partial correlation with confidence intervals, or regression with verbosity as covariate)
 
 ### Falsification Criteria
 
 The explicit reference → success claim is invalidated if:
 
-1. **Zero-reference equivalence**: Zero-reference trajectories succeed at ≥90% of high-reference success rates on identical tasks
-2. **Verbosity correlation**: Explicit reference frequency correlates more strongly with verbosity (r>0.6) than with task success (r<0.3)
-3. **Implicit retention priority**: Models with high explicit markers but low implicit retention (semantic inconsistency) fail at higher rates than models with low explicit markers but high implicit retention
+1. **Zero-reference equivalence**: Equivalence testing (TOST) demonstrates that zero-reference trajectories succeed at rates statistically equivalent to high-reference trajectories on identical tasks, with the equivalence margin justified based on practical significance. The claim is falsified if the 90% confidence interval for the success rate difference falls entirely within the equivalence margin, indicating that explicit markers do not meaningfully improve success rates.
+
+2. **Verbosity correlation dominance**: The 95% confidence interval for the correlation between explicit reference frequency and verbosity excludes zero and is substantially larger (non-overlapping confidence intervals or effect size difference) than the 95% confidence interval for the correlation between explicit reference frequency and task success (after controlling for verbosity). This indicates reference frequency is more strongly associated with verbosity than with functional retention.
+
+3. **Implicit retention priority**: Models with high explicit markers but low implicit retention (semantic inconsistency) fail at significantly higher rates than models with low explicit markers but high implicit retention, as determined by a statistical test (e.g., chi-square, logistic regression) with confidence intervals on the failure rate difference. The claim is falsified if explicit markers do not compensate for implicit retention failures, indicating markers are not the primary mechanism.
 
 ## 5. Structural Signals
 
