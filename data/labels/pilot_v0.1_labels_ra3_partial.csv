@@ -1,0 +1,36 @@
+trace_id,label_or_ambiguous,explanation
+traj_001,0,Missing parameter error indicates information loss from prior turns
+traj_002,0,Re-query pattern: querying information already available from prior tool output
+traj_003,2,Clean success with correct tool sequence and no errors
+traj_004,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_005,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_006,2,Clean success with correct tool sequence and no errors
+traj_007,ambiguous,Success but potentially wrong value - cannot verify conversation stream coordination without parameter visibility
+traj_008,0,Missing parameter error indicates information loss from prior turns
+traj_009,2,Clean success with correct tool sequence and no errors
+traj_010,0,Re-query pattern: querying information already available from prior tool output
+traj_011,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_012,2,Clean success with correct tool sequence and no errors
+traj_013,0,Missing parameter error indicates information loss from prior turns
+traj_014,2,Clean success with correct tool sequence and no errors
+traj_015,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_016,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_017,2,Clean success with correct tool sequence and no errors
+traj_018,0,Re-query pattern: querying information already available from prior tool output
+traj_019,2,Clean success with correct tool sequence and no errors
+traj_020,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_021,2,Clean success with correct tool sequence and no errors
+traj_022,0,Missing parameter error indicates information loss from prior turns
+traj_023,2,Clean success with correct tool sequence and no errors
+traj_024,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_025,2,Clean success with correct tool sequence and no errors
+traj_026,0,Incomplete: never called validate_config
+traj_027,2,Clean success with correct tool sequence and no errors
+traj_028,2,Clean success with correct tool sequence and no errors
+traj_029,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_030,2,Clean success with correct tool sequence and no errors
+traj_031,ambiguous,limit mismatch error - cannot distinguish information loss (L0) vs misapplication (L1) without parameter visibility
+traj_032,2,Clean success with correct tool sequence and no errors
+traj_033,0,Missing parameter error indicates information loss from prior turns
+traj_034,2,Clean success with correct tool sequence and no errors
+traj_035,0,Re-query pattern: querying information already available from prior tool output
