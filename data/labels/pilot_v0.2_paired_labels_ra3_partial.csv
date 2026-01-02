@@ -1,0 +1,21 @@
+trace_id,label_or_ambiguous,explanation
+traj_v2_001,1,"MISMATCH: observed_limit=75, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_002,0,MISSING_PARAMETER error code indicates information loss from prior turns
+traj_v2_003,2,Clean success with correct tool sequence and no errors
+traj_v2_004,system_failure,"VALIDATION_FAILURE: observed=100, expected=100 - agent passed correct value, system failed"
+traj_v2_005,1,"MISMATCH: observed_limit=250, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_006,1,"MISMATCH: observed_limit=102, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_007,1,"MISMATCH: observed_limit=1000, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_008,1,"MISMATCH: observed_limit=10, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_009,1,"MISMATCH: observed_limit=98, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_010,2,Clean success with correct tool sequence and no errors
+traj_v2_011,0,MISSING_PARAMETER error code indicates information loss from prior turns
+traj_v2_012,1,"MISMATCH: observed_limit=500, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_013,1,"MISMATCH: observed_limit=120, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_014,system_failure,"VALIDATION_FAILURE: observed=100, expected=100 - agent passed correct value, system failed"
+traj_v2_015,1,"MISMATCH: observed_limit=95, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_016,2,Clean success with correct tool sequence and no errors
+traj_v2_017,ambiguous,Insufficient observable signals to classify
+traj_v2_018,1,"MISMATCH: observed_limit=300, expected_limit=100 - agent passed wrong value but retained some information"
+traj_v2_019,system_failure,"VALIDATION_FAILURE: observed=100, expected=100 - agent passed correct value, system failed"
+traj_v2_020,2,Clean success with correct tool sequence and no errors
