@@ -110,9 +110,9 @@ def classify_under_partial_observability_v2(traj_id, signals):
     if any(e.get('error_code') == 'LEGACY' for e in errors):
         return ("ambiguous", "Legacy error format without structured fields")
     
-    # Any other success
+    # Any other success (with unclassified errors)
     if outcome == 'success':
-        return ("2", "Task success with no observable errors")
+        return ("ambiguous", "Task success but with unclassified error signals")
     
     # Any other failure
     if outcome == 'failure':
@@ -172,4 +172,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
