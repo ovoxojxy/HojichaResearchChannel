@@ -22,6 +22,19 @@ Messages were delivered live in Slack (this file is the post-hoc transcript for 
 
 Each RA branch gets `research-log/phase1_intake.md` (empty shell, filled during kickoff week).
 
+## Jarod — answers + checkpoint (thread `ts` `1776916185.202689`)
+
+- Alex: SAE + contrastive diffs both first-class; spine is whether geometry-aware work buys leakage/steg wins; no obligation to train SAE from scratch.
+- Brent: GPT-2-small for plumbing; one ~1B open run if signals weak; don’t boil ocean.
+- Chris: Tier claims — known-scheme + recoverability is core; blind LLM-judge is exploratory, heavy caveats / own subsection.
+- Checkpoint: specialties OK or reshuffle before lit review? Lock if no complaints by next day.
+
+## RA — intake pushed (thread)
+
+- Alex `1776916188.016939` — `research-log/phase1_intake.md` on RA1, commit `c87c39b`.
+- Brent `1776916189.401299` — RA2 intake, commit `b1d7481`.
+- Chris `1776916190.895279` — RA3 intake, commit `0f1c2d9`.
+
 ## Checkpoint (for human PI)
 
 Are the specialties right? Adjust before Phase 2?
